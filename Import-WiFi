@@ -110,6 +110,7 @@ function Import-WiFi {
     # Import the connections.    
     foreach ($file in Get-ChildItem $outputDirectory -Filter "*.xml") {
         try {
+            $file
             netsh wlan add profile filename=$file user=all
             $countSuccess++
         } catch {
