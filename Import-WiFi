@@ -1,0 +1,135 @@
+#!ps
+#timeout=1000000
+#maxlength=10000000000
+<#
+    .SYNOPSIS
+    Import process for transferring Wi-Fi connections to a new machine.
+
+    .DESCRIPTION
+    Import exported Wi-Fi connections.
+
+    .NOTES
+    Created by: Mark Koenig
+    Date:       2025-04-11
+    Revision:   0
+#>
+
+# Variables
+$folderPathRoot = "c:"
+$folderPathContainer = "wifi-export"
+$DocumentsFolderGUID = "{F42EE2D3-909F-4907-8871-4C22FC0BF756}"
+#$VerbosePreference = "Continue"
+
+# Create the PS drive for HKEY Users
+$driveName = "HKU"
+$drive = Get-PsDrive -Name $driveName -ErrorAction SilentlyContinue
+if (!($drive)) {
+    New-PSDrive -PSProvider Registry -Name $driveName -Root HKEY_USERS
+}
+
+function Get-FolderPathManually($InitialDirectory = "C:\")
+{
+    [System.Reflection.Assembly]::LoadWithPartialName("System.Windows.Forms") | Out-Null
+
+    $OpenFolderDialog = New-Object System.Windows.Forms.FolderBrowserDialog
+    $OpenFolderDialog.Description = "Select Wi-Fi Connections Folder"
+    $OpenFolderDialog.UseDescriptionForTitle = $true
+    $OpenFolderDialog.InitialDirectory = $InitialDirectory
+    
+    if ($OpenFolderDialog.ShowDialog() -eq "OK") {
+        return $OpenFolderDialog.SelectedPath
+    }
+
+    throw "No folder selected. Operation cancelled."
+
+}
+
+function Get-FolderPathLocal {
+    return (Join-Path -Path $folderPathRoot -ChildPath $folderPathContainer)
+}
+
+function Get-FolderPathOneDrive {
+    Write-Verbose "Attempting to retrieve OneDrive path ..."
+    # Find the current user's OneDrive redirection
+    # See if the user is logged in
+    $_folderPathRoot = $folderPathRoot
+    if ($username = (Get-CimInstance -class win32_computersystem).username) {
+        # If the user is logged in ...
+        # Get the SID
+        $sid = (New-Object Security.Principal.NTAccount($username)).Translate([Security.Principal.SecurityIdentifier]).Value
+
+        # Get the path to the documents folder
+        $_folderPathRoot = Get-ItemProperty -Path "HKU:\$sid\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders" $DocumentsFolderGUID -ErrorAction SilentlyContinue | Select-Object -ExpandProperty $DocumentsFolderGUID
+    }
+
+    # Concatenate the paths
+    return (Join-Path -Path $_folderPathRoot -ChildPath $folderPathContainer)
+}
+
+function Get-FolderPath {
+    Write-Verbose "Attempting to retrieve folder path ..."
+    # Only one of the two paths will be true. If neither path is true, open
+    # File Explorer to browse to the folder.
+    $oneDrivePath = Get-FolderPathOneDrive
+    if (Test-Path -Path $oneDrivePath) {
+        return $oneDrivePath
+    } 
+    
+    $localPath = Get-FolderPathLocal
+    if (Test-Path -Path $localPath) {
+        return $localPath
+    } 
+    
+    return Get-FolderPathManually
+
+}
+
+function Import-WiFi {
+    # Function variables
+    $countSuccess = 0
+    $countFailure = 0
+
+    Write-Host "Attempting to import Wi-Fi connections ..."
+    
+    # Check if the directory exists.
+    if (!(Test-Path -Path $outputDirectory -PathType Container)) {
+        Write-Host "$outputDirectory doesn't exist. Please copy this folder from the host machine first." -ForegroundColor Red
+        return
+    }
+
+    # Check if the user is attempting to import on the same computer that generated the exported files.
+    if (Test-Path $deviceNameFile) {
+        if ((Get-Content -Path $deviceNameFile) -eq $env:COMPUTERNAME) {
+            Write-Host "This is the export computer. Please attempt to import these connections on a different machine." -ForegroundColor Red
+            return
+        }    
+    } else {
+        Write-Warning "Warning: device.txt not found. Proceeding anyway."
+    }
+
+    # Import the connections.    
+    foreach ($file in Get-ChildItem $outputDirectory -Filter "*.xml") {
+        try {
+            netsh wlan add profile filename=$file user=all
+            $countSuccess++
+        } catch {
+            Write-Warning "Failed to import $($file.Name): $_"
+            $countFailure++
+        }
+    }
+
+    Write-Host "`nIMPORT RESULTS"
+    Write-Host "Success`t`tFailure"
+    Write-Host "---------`t---------"
+    Write-Host "$countSuccess`t`t$countFailure"
+    
+}
+
+# Variables
+$outputDirectory    = Get-FolderPath
+$deviceNameFile     = Join-Path -Path $outputDirectory -ChildPath "device.txt"
+
+# Process the command
+Import-WiFi
+
+Write-Host "`nProcess finished."
