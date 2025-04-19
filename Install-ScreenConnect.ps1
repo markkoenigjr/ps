@@ -18,7 +18,7 @@ if ($IsWindows) {
 
 # Incorporate MacOS and Linux installation routines.
 if ($IsMacOS -Or $IsLinux) {
-    $root           = "/"
+    $root           = pwd
     $fileExtension  = "sh"
     $fileName       = "sc.$fileExtension"
     $folderPath     = Join-Path -Path $root -ChildPath "ScreenConnect"
