@@ -35,4 +35,10 @@ New-Item -ItemType Directory -Path $folderPath -Force
 Invoke-WebRequest -Uri $uri -OutFile $fullFilePath
 
 # Initiate the process
-Start-Process -FilePath $fullFilePath
+if ($IsWindows) {
+    Start-Process -FilePath $fullFilePath
+}
+
+if ($IsMacOS) {
+    Start-Process -FilePath "/usr/bin/sudo" -ArgumentList "pwsh", "-c", "'$fullFilePath'"
+}
