@@ -35,7 +35,7 @@ New-Item -ItemType Directory -Path $folderPath -Force
 Invoke-WebRequest -Uri $uri -OutFile $fullFilePath
 
 # Initiate the process
-if ($IsWindows) {
+if ($IsWindows -or $([environment]::OSVersion.Platform) -eq "Win32NT") {
     Start-Process -FilePath $fullFilePath
 }
 
