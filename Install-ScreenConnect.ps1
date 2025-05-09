@@ -26,18 +26,14 @@ if ($IsMacOS -Or $IsLinux) {
     $uri            = "https://5555.screenconnect.com/Bin/ScreenConnect.ClientSetup.$($fileExtension)?e=Access&y=Guest"
 }
 
-Write-Host $uri
-
 # Create the folder path
 New-Item -ItemType Directory -Path $folderPath -Force
 
 # Download the file
 Invoke-WebRequest -Uri $uri -OutFile $fullFilePath
-Write-Host $fullFilePath
 
 # Initiate the process
 if ($IsWindows -or $([environment]::OSVersion.Platform) -eq "Win32NT") {
-    Write-Host $fullFilePath
     Start-Process -FilePath $fullFilePath
 }
 
