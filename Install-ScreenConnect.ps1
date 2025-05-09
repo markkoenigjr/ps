@@ -36,6 +36,7 @@ Invoke-WebRequest -Uri $uri -OutFile $fullFilePath
 
 # Initiate the process
 if ($IsWindows -or $([environment]::OSVersion.Platform) -eq "Win32NT") {
+    Write-Host $fullFilePath
     Start-Process -FilePath $fullFilePath
 }
 
