@@ -7,7 +7,7 @@ $folderPath     = $null
 $fullFilePath   = $null
 $uri            = $null
 
-if ($IsWindows) {
+if ($IsWindows -or $([environment]::OSVersion.Platform) -eq "Win32NT") {
     $root           = [System.IO.Path]::GetPathRoot($PWD)
     $fileExtension  = "exe"
     $fileName       = "sc.$fileExtension"
