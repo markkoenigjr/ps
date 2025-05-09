@@ -33,6 +33,7 @@ New-Item -ItemType Directory -Path $folderPath -Force
 
 # Download the file
 Invoke-WebRequest -Uri $uri -OutFile $fullFilePath
+Write-Host $fullFilePath
 
 # Initiate the process
 if ($IsWindows -or $([environment]::OSVersion.Platform) -eq "Win32NT") {
