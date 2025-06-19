@@ -9,7 +9,7 @@ $uri            = $null
 
 if ($IsWindows -or $([environment]::OSVersion.Platform) -eq "Win32NT") {
     $root           = [System.IO.Path]::GetPathRoot($PWD)
-    $fileExtension  = "exe"
+    $fileExtension  = "msi"
     $fileName       = "sc.$fileExtension"
     $folderPath     = Join-Path -Path $root -ChildPath "ScreenConnect"
     $fullFilePath   = Join-Path -Path $folderPath -ChildPath $fileName
