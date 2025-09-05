@@ -64,38 +64,48 @@ $jsonData = '{
  
 # Create the temp directory if it doesn't exist.
 if (-Not (Test-Path -Path $filepath)) {
-    Write-Host "c:\temp does not exist. Creating folder."
-    New-Item -Path $filepath -ItemType "Directory"
+  Write-Host "c:\temp does not exist. Creating folder."
+  New-Item -Path $filepath -ItemType "Directory"
 }
  
 # Download Sumo
+Write-Host "Downloading Sumo installer. Please be patient."
 try {
-    Invoke-WebRequest -Uri $downloadInstaller -OutFile $outfileInstaller
-} catch {
-    Write-Host "There was a problem downloading a file."
-    Exit
+  $webClient = New-Object System.Net.WebClient
+  $webClient.DownloadFile($downloadInstaller, $outfileInstaller)
+}
+catch {
+  Write-Host "There was a problem downloading a file."
+  Exit
 }
  
 # Create the JSON file
+Write-Host "`nCreating the Sumo JSON file. Please be patient."
 try {
-    $jsonData | Set-Content -Path $outfileJson
-} catch {
-    Write-Host "There was a problem creating the JSON file."
-}
- 
-try {
-    Write-Host "Beginning the installation of the Sumo Logic client."
-    Start-Process -FilePath $outfileInstaller -ArgumentList "-console","-q","-Vsumo.token_and_url=$token","-Vsources=$outfileJson" -Wait
-    Write-Host "Sumo Logic client installed successfully. Please check the Sumo Logic console."
+  $jsonData | Set-Content -Path $outfileJson
+  Write-Host "JSON file created successfully."
 }
 catch {
-    Write-Host "There was a problem installing the file. Please manually execute the installation."
-    Exit
+  Write-Host "There was a problem creating the JSON file."
+}
+
+Write-Host "`nBeginning the installation of the Sumo Logic client. Please be patient."
+try {
+  Start-Process -FilePath $outfileInstaller -ArgumentList "-console", "-q", "-Vsumo.token_and_url=$token", "-Vsources=$outfileJson" -Wait
+  Write-Host "Sumo Logic client installed successfully. Please check the Sumo Logic console."
+}
+catch {
+  Write-Host "There was a problem installing the file. Please manually execute the installation."
+  Exit
 }
 
 # Cleanup
+Write-Host "`nCleaning up."
 try {
-    Remove-Item -Path $filepath -Recurse
-} catch {
-    Write-Host "There was a pronblem deleting the files. You must manually delete them."
+  Remove-Item -Path $filepath -Recurse
 }
+catch {
+  Write-Host "There was a pronblem deleting the files. You must manually delete them."
+}
+
+Write-Host "`nSumo installation complete."
