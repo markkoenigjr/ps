@@ -1,5 +1,6 @@
 #!ps
 #timeout=1000000
+#https://ps.hfgrp.com/adp
 
 # PREREQUISITES
 # Confirm that PowerShell version 7 is running
@@ -22,11 +23,13 @@ foreach ($module in $modules) {
 }
 
 ### VARIABLES ###
+$clientId           = "ec6e053b-7483-4c2b-84bd-a32f53f0abf6"
+$tenant             = "hufriedy.onmicrosoft.com"
 $siteUrl            = "https://hufriedy.sharepoint.com/sites/Hu-FriedyDesktopServices"
 $fileRelativeUrl    = "/Shared%20Documents/Tech%20Articles/Powershell%20Scripts/ADP/Import-AdpData.ps1"
 
 # Connect to SharePoint
-Connect-PnPOnline -Url $siteUrl -UseWebLogin
+Connect-PnPOnline -Url $siteUrl -ClientId $clientId -Tenant $tenant -Interactive
 
 # Get file from SharePoint
 try {
