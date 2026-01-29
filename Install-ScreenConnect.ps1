@@ -13,7 +13,6 @@ if ($IsWindows -or $([environment]::OSVersion.Platform) -eq "Win32NT") {
     $fileName       = "sc.$fileExtension"
     $folderPath     = Join-Path -Path $root -ChildPath "ScreenConnect"
     $fullFilePath   = Join-Path -Path $folderPath -ChildPath $fileName
-    #$uri            = "https://5555.screenconnect.com/Bin/ScreenConnect.ClientSetup.$($fileExtension)?e=Access&y=Guest"
     $uri            = "https://rmmus-hufriedymanufacturing.screenconnect.com/Bin/ScreenConnect.ClientSetup.$($fileExtension)?e=Access&y=Guest"
 }
 
@@ -24,7 +23,6 @@ if ($IsMacOS -Or $IsLinux) {
     $fileName       = "sc.$fileExtension"
     $folderPath     = Join-Path -Path $root -ChildPath "ScreenConnect"
     $fullFilePath   = Join-Path -Path $folderPath -ChildPath $fileName
-    #$uri            = "https://5555.screenconnect.com/Bin/ScreenConnect.ClientSetup.$($fileExtension)?e=Access&y=Guest"
     $uri            = "https://rmmus-hufriedymanufacturing.screenconnect.com/Bin/ScreenConnect.ClientSetup.$($fileExtension)?e=Access&y=Guest"
 }
 
